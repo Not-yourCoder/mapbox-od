@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 // import { MapboxStyleSwitcherControl } from "mapbox-gl-style-switcher";
-import { geojson  } from "./geoJson";  
+import { geojson } from "./geoJson";
 import { pulsingDot } from "../ui/pulsingDot/pulsingDot";
 
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -14,20 +14,29 @@ export const Mapbox = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [is3D, setIs3D] = useState(false);
-
   useEffect(() => {
     mapboxgl.accessToken = "pk.eyJ1IjoibXJwaG90b24iLCJhIjoiY2x5b2k2dmYzMGRjaTJvcGxtZW1zcjhxMSJ9.S9dL6ZYqB1u8RUEbTGQ1IQ";
 
     if (!mapContainerRef.current) return;
+    const start = {
+      center: [0, 0] as [number, number],
+      zoom: 2,
+      pitch: 0,
+      bearing: 0,
+    };
 
+    const end = {
+      center: [84, 20] as [number, number],
+      zoom: 6.5,
+      bearing: 0,
+      pitch: 0,
+    };
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: [84.803, 20],
-      zoom: 6.8
+      ...start
     });
-
-    mapRef.current = map;
+    mapRef.current = map
 
     // Controls
     map.addControl(
@@ -41,6 +50,11 @@ export const Mapbox = () => {
     // map.addControl(new MapboxStyleSwitcherControl());
 
     map.on("load", () => {
+      map.flyTo({
+        ...end,
+        duration: 12000,
+        essential: true,
+      });
       map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
 
       map.addSource('dot-point', {
@@ -86,7 +100,7 @@ export const Mapbox = () => {
         }
       });
 
-     
+
 
       const popup = new mapboxgl.Popup({
         closeButton: false,
